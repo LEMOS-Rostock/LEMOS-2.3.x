@@ -84,13 +84,13 @@ void Foam::uTau::calcFrictionVelocity
 
         vectorField ssp = (-Sfp/magSfp) & Reffp;
 
-        scalar uTauMinp = gMin(sqrt(mag(ssp)));
+        scalar uTauMinp = gMin(mag(ssp));
         uTauMin += uTauMinp;
 
-        scalar uTauMaxp = gMax(sqrt(mag(ssp)));
+        scalar uTauMaxp = gMax(mag(ssp));
         uTauMax += uTauMaxp;
 
-        scalar uTauAvgp = gAverage(sqrt(mag(ssp)));
+        scalar uTauAvgp = gAverage(mag(ssp));
         uTauAvg += uTauAvgp;
 
         if (log_ > 2)
@@ -103,9 +103,9 @@ void Foam::uTau::calcFrictionVelocity
 
     scalar numWallPatches = patchSet_.size();
 
-    uTauMin = uTauMin/numWallPatches;
-    uTauMax = uTauMax/numWallPatches;
-    uTauAvg = uTauAvg/numWallPatches;
+    uTauMin = sqrt(uTauMin/numWallPatches);
+    uTauMax = sqrt(uTauMax/numWallPatches);
+    uTauAvg = sqrt(uTauAvg/numWallPatches);
         
     if (Pstream::master())
     {
@@ -149,13 +149,13 @@ void Foam::uTau::calcFrictionVelocity
 
         const vectorField wallGradU = -U.boundaryField()[patchI].snGrad();
 
-        scalar uTauMinp = gMin(sqrt(nu*mag(wallGradU)));
+        scalar uTauMinp = gMin(nu*mag(wallGradU));
         uTauMin += uTauMinp;
 
-        scalar uTauMaxp = gMax(sqrt(nu*mag(wallGradU)));
+        scalar uTauMaxp = gMax(nu*mag(wallGradU));
         uTauMax += uTauMaxp;
 
-        scalar uTauAvgp = gAverage(sqrt(nu*mag(wallGradU)));
+        scalar uTauAvgp = gAverage(nu*mag(wallGradU));
         uTauAvg += uTauAvgp;
 
         if (log_ > 2)
@@ -167,9 +167,9 @@ void Foam::uTau::calcFrictionVelocity
 
     scalar numWallPatches = patchSet_.size();
 
-    uTauMin = uTauMin/numWallPatches;
-    uTauMax = uTauMax/numWallPatches;
-    uTauAvg = uTauAvg/numWallPatches;
+    uTauMin = sqrt(uTauMin/numWallPatches);
+    uTauMax = sqrt(uTauMax/numWallPatches);
+    uTauAvg = sqrt(uTauAvg/numWallPatches);
 
     if (Pstream::master())
     {
