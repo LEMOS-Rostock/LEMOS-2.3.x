@@ -11,4 +11,5 @@ Installation
 2. add the following line to your ~/.bashrc after ". ~/OpenFOAM/OpenFOAM-2.3.x/bashrc":
      . $FOAM_SRC/LEMOS-2.3.x/bashrc
 3. parse your ~/.bashrc or open a new terminal
-4. Execute $LEMOSEXT/Allwmake to build the library and executables
+4. Execute applyPatches to install patches in $FOAM_SRC folder
+5. Execute $LEMOSEXT/Allwmake to build the library and executables
