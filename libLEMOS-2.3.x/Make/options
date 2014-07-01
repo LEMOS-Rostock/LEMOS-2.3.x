@@ -9,6 +9,8 @@ EXE_INC = \
  -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
  -I$(LIB_SRC)/turbulenceModels/LES/LESdeltas/lnInclude \
  -I$(LIB_SRC)/turbulenceModels/LES/LESfilters/lnInclude \
+ -I$(LIB_SRC)/postProcessing/functionObjects/field/fieldAverage/fieldAverage \
+ -I$(LIB_SRC)/postProcessing/functionObjects/field/fieldAverage/fieldAverageItem \
  -I$(LIB_SRC)/turbulenceModels/incompressible/LES/LESModel
 
 
@@ -24,4 +26,5 @@ LIB_LIBS = \
  -lLESdeltas \
  -ltriSurface \
  -ldynamicMesh \
+ -lfieldFunctionObjects \
  -lmeshTools 
