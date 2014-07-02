@@ -25,7 +25,7 @@ Application
     LambdaCI
 
 Description
-    Calculates and writes the LambdaCI criteria.
+    Calculates and writes the LambdaCI criterion.
 
 \*---------------------------------------------------------------------------*/
 
