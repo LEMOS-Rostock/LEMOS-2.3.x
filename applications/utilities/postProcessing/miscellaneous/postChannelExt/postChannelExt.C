@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
                Info << endl;
                Info << "    Reading field" << endl;
 
-               volSymmTensorField field(fieldHeader, mesh);
+               volTensorField field(fieldHeader, mesh);
 
                Info << "    Collapsing field"  << endl;
                Info << endl;
