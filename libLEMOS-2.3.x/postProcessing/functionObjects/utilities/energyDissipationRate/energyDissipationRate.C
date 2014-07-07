@@ -103,7 +103,8 @@ Foam::energyDissipationRate::energyDissipationRate
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
+        
+/*
         volScalarField* energyDissipationRatePtr
         (
             new volScalarField
@@ -122,6 +123,25 @@ Foam::energyDissipationRate::energyDissipationRate
         );
 
         mesh.objectRegistry::store(energyDissipationRatePtr);
+*/
+        volTensorField* energyDissipationRateTensorPtr
+        (
+            new volTensorField
+            (
+                IOobject
+                (
+                    fieldName_,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedTensor("0", sqr(dimLength)/pow(dimTime,3), tensor(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+            )
+        );
+
+        mesh.objectRegistry::store(energyDissipationRateTensorPtr);
     }
 }
 
@@ -151,17 +171,21 @@ void Foam::energyDissipationRate::execute()
 
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
         
+    const volVectorField& UMean = mesh.lookupObject<volVectorField>("UMean");
+
     const volVectorField& U = mesh.lookupObject<volVectorField>("U");
 
+    const volVectorField u = U - UMean;
+
     const volTensorField gradU(fvc::grad(U));
+    const volTensorField gradu(fvc::grad(u));
         
-    volScalarField& energyDissipationRate =
-            const_cast<volScalarField&>
+    volTensorField& energyDissipationRateTensor =
+            const_cast<volTensorField&>
             (
-                mesh.lookupObject<volScalarField>(fieldName_)
+                mesh.lookupObject<volTensorField>(fieldName_)
             );
-
-
+     
     if (comp)
     {
         const compressible::turbulenceModel& model =
@@ -174,7 +198,9 @@ void Foam::energyDissipationRate::execute()
         const incompressible::turbulenceModel& model =
             obr_.lookupObject<incompressible::turbulenceModel>(turbulenceModelName);
 
-        energyDissipationRate = -model.devReff()&&(symm(gradU));
+        //energyDissipationRate = -model.devReff()&&(symm(gradU));
+        //energyDissipationRate = 2*model.nu()*magSqr(symm(gradU));
+        energyDissipationRateTensor = 2*model.nu()*(gradu.T()&gradu);
     }
 }
 
