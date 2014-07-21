@@ -35,7 +35,6 @@ turbulenceModels/incompressible/HYBRID/hybDynV2F/hybDynV2F.C
 /*turbulenceModels/incompressible/HYBRID/hybKOmegaSSTdynOneEqEddy/hybKOmegaSSTdynOneEqEddy.C*/
 turbulenceModels/incompressible/LES/dynamicMixedModel/dynamicMixedModel.C
 turbulenceModels/incompressible/LES/LDMMS/LDMMS.C
-turbulenceModels/incompressible/LES/MFM/MFM.C
 turbulenceModels/incompressible/PANS/PANSModel/PANSModel.C
 turbulenceModels/incompressible/PANS/kEpsilon/kEpsilon.C
 turbulenceModels/incompressible/PANS/turbulentPrandtlModels/turbulentPrandtlModel/turbulentPrandtlModel.C
@@ -49,6 +48,7 @@ postProcessing/functionObjects/utilities/energyDissipationRate/energyDissipation
 postProcessing/functionObjects/utilities/energyDissipationRate/energyDissipationRateFunctionObject.C
 postProcessing/functionObjects/field/fieldAverageExt/fieldAverageExt/fieldAverageExt.C
 postProcessing/functionObjects/field/fieldAverageExt/fieldAverageExtFunctionObject/fieldAverageExtFunctionObject.C
+
 
 postProcessing/POD/PODEigenBase/PODEigenBase.C
 postProcessing/POD/PODOrthoNormalBase/scalarPODOrthoNormalBase.C
