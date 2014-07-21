@@ -35,7 +35,6 @@ turbulenceModels/incompressible/HYBRID/hybDynV2F/hybDynV2F.C
 /*turbulenceModels/incompressible/HYBRID/hybKOmegaSSTdynOneEqEddy/hybKOmegaSSTdynOneEqEddy.C*/
 turbulenceModels/incompressible/LES/dynamicMixedModel/dynamicMixedModel.C
 turbulenceModels/incompressible/LES/LDMMS/LDMMS.C
-/*turbulenceModels/incompressible/LES/MFM/MFM.C*/
 turbulenceModels/incompressible/PANS/PANSModel/PANSModel.C
 turbulenceModels/incompressible/PANS/kEpsilon/kEpsilon.C
 turbulenceModels/incompressible/PANS/turbulentPrandtlModels/turbulentPrandtlModel/turbulentPrandtlModel.C
