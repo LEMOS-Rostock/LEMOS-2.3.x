@@ -104,26 +104,6 @@ Foam::energyDissipationRate::energyDissipationRate
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
         
-/*
-        volScalarField* energyDissipationRatePtr
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    fieldName_,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensionedScalar("0", sqr(dimLength)/pow(dimTime,3), 0.0)
-            )
-        );
-
-        mesh.objectRegistry::store(energyDissipationRatePtr);
-*/
         volTensorField* energyDissipationRateTensorPtr
         (
             new volTensorField
@@ -198,9 +178,7 @@ void Foam::energyDissipationRate::execute()
         const incompressible::turbulenceModel& model =
             obr_.lookupObject<incompressible::turbulenceModel>(turbulenceModelName);
 
-        //energyDissipationRate = -model.devReff()&&(symm(gradU));
-        //energyDissipationRate = 2*model.nu()*magSqr(symm(gradU));
-        energyDissipationRateTensor = 2*model.nu()*(gradu.T()&gradu);
+        energyDissipationRateTensor = 2*model.nuEff()*(gradu.T()&gradu);
     }
 }
 
