@@ -85,6 +85,22 @@ MFM::MFM
      ),
       mesh_
    ),
+   testField
+  (
+     IOobject
+     (
+      "testField",
+      runTime_.timeName(),
+      mesh_,
+      IOobject::NO_READ,
+      IOobject::AUTO_WRITE
+     ),
+      mesh_,
+      dimensionedScalar("testField", dimless, 0.0),
+  //    dimensionedScalar("testField", dimensionSet(0,2,-3,0,0,0,0), 0.0),
+      zeroGradientFvPatchScalarField::typeName
+  ),
+
   sgsDissipation_
   (
      IOobject
@@ -96,7 +112,9 @@ MFM::MFM
       IOobject::AUTO_WRITE
      ),
       mesh_,
-      dimensionedScalar("UU", dimensionSet(0,2,-3,0,0,0,0), 0.0),
+      //dimensionedScalar("UU", dimensionSet(0,2,-3,0,0,0,0), 0.0),
+      //dimensionedTensor("UU", dimensionSet(0,2,-3,0,0,0,0), tensor(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)),
+      dimensionedTensor("UU", dimensionSet(0,0,-1,0,0,0,0), tensor(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)),
       "zeroGradient"
   ),
   N_
@@ -201,11 +219,12 @@ tmp<volSymmTensorField> MFM::B() const
   return  symm(-(F1()*U()*uDelta_+ F1()*uDelta_*U()) - (sqr(F1())*uDelta_*uDelta_)) ;
 }
 
-// Scaling factor 2^(-2/3*N)*sqrt(2^(4/3*N)-1) 
+
 tmp<volScalarField> MFM::F1() const
 {
   //return  Csgs()*Cai_*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
-  return  Csgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+  //return  Csgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+  return  testField*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
 }
 
 tmp<volSymmTensorField> MFM::devReff() const
@@ -221,7 +240,7 @@ tmp<volScalarField> MFM::epsilon() const
   (
      -(F1()*U()*uDelta_+ F1()*uDelta_*U() + sqr(F1())*uDelta_*uDelta_)
      &&
-     dev(symm(fvc::grad(U())))
+     symm(fvc::grad(U()))
   );
 }
 
@@ -255,7 +274,8 @@ tmp<fvVectorMatrix> MFM::divDevReff(volVectorField& U) const
   return
   (
      - fvm::laplacian(nu(), U, "laplacian(nu,U)")
-     + filter( fvc::div((F1()*U*uDelta)+ (F1()*uDelta*U) + (sqr(F1())*uDelta*uDelta), "div(MFM)")) 
+     //+ filter( fvc::div((F1()*U*uDelta)+ (F1()*uDelta*U) + (sqr(F1())*uDelta*uDelta), "div(MFM)")) 
+     + fvc::div((F1()*U*uDelta)+ (F1()*uDelta*U) + (sqr(F1())*uDelta*uDelta), "div(MFM)") 
   );
 }
 
@@ -274,18 +294,6 @@ tmp<fvVectorMatrix> MFM::divDevRhoReff
     );
 }
 
-/*
-tmp<volVectorField> MFM::F(const volScalarField &f) const
-{
-
-  return
-    (
-      *LeoPhi_[f.name()] - (*turbulentDiffusivity_[f.name()]) * fvc::grad(f)
-     );
-
-}
-
-*/
 tmp<volScalarField> MFM::molecularDiffusivityCoeff(word name) const
 {
   return
@@ -334,61 +342,54 @@ void MFM::correct(const tmp<volTensorField>& gradU)
 {
   LESModel::correct(gradU);
   uDelta_ = U()-filter2(U());
-  sgsDissipation_ = epsilon();
+//  volTensorField s = 0.5*(fvc::grad(U())+fvc::grad(U())().T());
+  //sgsDissipation_ = (-(F1()*U()*uDelta_+ F1()*uDelta_*U() + sqr(F1())*uDelta_*uDelta_))().T() & s;
+ // sgsDissipation_ = s&s;
   viscLengthScale_ = F1();
+//  viscLengthScale_ =  (pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0));
   Ureynolds_ = B();
+
+ //volSymmTensorField S = dev(symm(gradU()));
+ volSymmTensorField S = dev(symm(fvc::grad(uDelta_)));
+ volSymmTensorField SS = dev(symm(fvc::grad(uDelta_)))*sqr(delta())/nu();
+ //volSymmTensorField S = dev(symm(fvc::grad(U())));
+  volScalarField Re = mag(S)*sqr(delta())/nu();
+   max(Re,Re,1.0);
+
+ //volVectorField M = -2.0 * sqr( delta() ) * mag( filter2( gradU ) ) * filter2( fvc::grad(testField) ) + 2.0 * sqr( delta() ) * filter2( mag( gradU ) * fvc::grad(testField) );
+ //volSymmTensorField M =   (filter2(S*Re) - 4*(filter2((S)) * filter2(Re))); 
+   //volScalarField epsilon = -2 * nu()*(S && S);
+   //testField = 2 *(S && S)*sqr(delta())*sqr(delta())/nu()/nu();
+   //testField =  (S && S)/max(S&&S);
+   testField =  Re/max(Re)*Csgs() + Csgs();
+   
+   //volScalarField epsilon =  2*nu()*(S && S);
+   //testField = epsilon / max(epsilon) * 0.05 + 0.05;
+ 
+
 
   /// strain rate tensor
   updateSubGridScaleFields(dev(symm(gradU)));
   //Info << "average B: " << average(F1()) << endl;
 }
 
-// Number of cascade steps log2(delta/Kolmogorov)
+
 void MFM::updateN(const volSymmTensorField& S)
 {
+    Info << "calculating number of cascade steps" << endl;
 
-  Info << "calculating number of cascade steps" << endl;
+    ReU(S);
+    // ReS(S);
 
-//  if(viscLengthScale_.headerOk())
-  //{
-  //  // N_ = (log(delta()/viscLengthScale_)/log(2.0));
- // }
- // else
-  {
-       ReU(S);
-     // ReS(S);
+    scalar cv = readScalar(thermoDict.lookup("cv"));
 
-       scalar cv = readScalar(thermoDict.lookup("cv"));
+    scalarField tmp = cv*pow(Re_,0.75);
+    max(tmp,tmp,1.0);
 
+    N_.internalField() = log(tmp)/log(2.0);
+    N_.correctBoundaryConditions();
 
-       scalarField tmp = cv*pow(Re_,0.75);
-       max(tmp,tmp,1.0);
-
-       N_.internalField() = log(tmp)/log(2.0);
-       N_.correctBoundaryConditions();
-       //Info << max(N_) << endl;
-       //Info << min(N_) << endl;
-
-     Info << "updating number of cascade steps: " << average(N_) << endl;
-  }
-/*
-   volScalarField cellDist
-   (
-                    IOobject
-                    (
-                        "N",
-                        U().time().timeName(),
-                        mesh_,
-                        IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    mesh_,
-                    0.0,
-                    zeroGradientFvPatchScalarField::typeName
-                );
-  cellDist.internalField()=Cai_*Csgs();
-  cellDist.write();
-*/
+    Info << "updating number of cascade steps: " << average(N_) << endl;
 }
 
 

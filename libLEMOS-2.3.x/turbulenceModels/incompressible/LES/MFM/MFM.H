@@ -50,7 +50,9 @@ protected:
   volScalarField viscLengthScale_;
   volSymmTensorField Ureynolds_;
   volVectorField uDelta_;
-  volScalarField sgsDissipation_;
+  //volScalarField sgsDissipation_;
+  volScalarField testField;
+  volTensorField sgsDissipation_;
 
   volScalarField Re_;
   volScalarField N_;
