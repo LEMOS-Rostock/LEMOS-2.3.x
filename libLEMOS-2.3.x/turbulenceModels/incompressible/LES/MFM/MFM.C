@@ -346,13 +346,13 @@ void MFM::correct(const tmp<volTensorField>& gradU)
   //sgsDissipation_ = (-(F1()*U()*uDelta_+ F1()*uDelta_*U() + sqr(F1())*uDelta_*uDelta_))().T() & s;
  // sgsDissipation_ = s&s;
   viscLengthScale_ = F1();
-//  viscLengthScale_ =  (pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0));
+  volScalarField viscLengthScale =  (pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0));
   Ureynolds_ = B();
 
  //volSymmTensorField S = dev(symm(gradU()));
- volSymmTensorField S = dev(symm(fvc::grad(uDelta_)));
+ //volSymmTensorField S = dev(symm(fvc::grad(uDelta_)));
  volSymmTensorField SS = dev(symm(fvc::grad(uDelta_)))*sqr(delta())/nu();
- //volSymmTensorField S = dev(symm(fvc::grad(U())));
+ volSymmTensorField S = dev(symm(fvc::grad(U())));
   volScalarField Re = mag(S)*sqr(delta())/nu();
    max(Re,Re,1.0);
 
@@ -361,7 +361,7 @@ void MFM::correct(const tmp<volTensorField>& gradU)
    //volScalarField epsilon = -2 * nu()*(S && S);
    //testField = 2 *(S && S)*sqr(delta())*sqr(delta())/nu()/nu();
    //testField =  (S && S)/max(S&&S);
-   testField =  Re/max(Re)*Csgs() + Csgs();
+   testField.internalField() =  2.0/constant::mathematical::pi*atan((Re-1)/(sqr(N_/(viscLengthScale+SMALL))().internalField()+SMALL))*Csgs();
    
    //volScalarField epsilon =  2*nu()*(S && S);
    //testField = epsilon / max(epsilon) * 0.05 + 0.05;
