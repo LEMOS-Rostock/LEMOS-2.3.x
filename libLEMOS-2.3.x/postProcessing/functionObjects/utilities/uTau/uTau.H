@@ -132,23 +132,22 @@ protected:
         //- Total time
         label totalIter_;
 
-        //- minimum global friction velocity 
-        scalar uTauMin;
-
-        //- maximum global friction velocity 
-        scalar uTauMax;
-
-        //- averaged global friction velocity 
-        scalar uTauAvg;
-
     // Protected Member Functions
 
         //- File header information
         virtual void writeFileHeader(const label i);
 
         //- Calculate the friction velocity using wall normal
-        //  and stress tensor Reff from turbulence model
+        //  and stress tensor Reff from turbulence model (traction)
         void calcFrictionVelocity
+        (
+            const fvMesh& mesh,
+            const volSymmTensorField& Reff
+        );
+
+        //- Calculate the friction velocity using wall normal
+        //  and stress tensor Reff from turbulence model
+        void calcFrictionVelocity2
         (
             const fvMesh& mesh,
             const volSymmTensorField& Reff

@@ -48,17 +48,10 @@ defineTypeNameAndDebug(uTau, 0);
 void Foam::uTau::writeFileHeader(const label i)
 {
     // Add headers to output data
-    file() <<  token::TAB << "# Friction velocity based on sqrt(mag(snGrad(Reff)))" 
-           <<  token::TAB << token::TAB 
-	   << "# Friction velocity based on sqrt(nu*mag(snGrad(U)))" << nl
-           <<  "# time " 
-           << token::TAB << token::TAB << "uTauMin" 
-           << token::TAB << token::TAB << "uTauMax" 
-           << token::TAB << token::TAB << "uTauAvg" 
-	   <<  token::TAB << token::TAB 
-           << token::TAB << token::TAB << "uTauMin"
-           << token::TAB << token::TAB << "uTauMax" 
-           << token::TAB << token::TAB << "uTauAvg"
+    file() <<   "#Column 1: time" << nl 
+           <<   "#Column 2: uTau based on sqrt(mag(avg(nf&Reff)))" << nl
+	   <<   "#Column 3: uTau based on sqrt(mag(avg(nf&Reff)-(nf&(nf&Reff))*nf))" << nl
+	   <<   "#Column 4: uTau based on sqrt(mag(avg(snGrad(U)*nu)))" << nl
 	   << endl;
 }
 
@@ -69,9 +62,7 @@ void Foam::uTau::calcFrictionVelocity
     const volSymmTensorField& Reff
 )
 {
-    uTauMin = 0.0;
-    uTauMax = 0.0;
-    uTauAvg = 0.0;
+    vector uTauAvg(0.0, 0.0, 0.0);
 
     forAllConstIter(labelHashSet, patchSet_, iter)
     {
@@ -84,46 +75,82 @@ void Foam::uTau::calcFrictionVelocity
 
         vectorField ssp = (-Sfp/magSfp) & Reffp;
 
-        scalar uTauMinp = gMin(mag(ssp));
-        uTauMin += uTauMinp;
-
-        scalar uTauMaxp = gMax(mag(ssp));
-        uTauMax += uTauMaxp;
-
-        scalar uTauAvgp = gAverage(mag(ssp));
+        vector uTauAvgp = gAverage(ssp);
         uTauAvg += uTauAvgp;
 
         if (log_ > 2)
         {
-            Info<< "  Reff:  min/max/avg(" << pp.name() << ") = " 
-                << uTauMinp << ", " << uTauMaxp << ", " << uTauAvgp << endl;
+            Info<< "  tauWall  avg(" << pp.name() << "): " 
+                << uTauAvgp << endl;
         }
     }
 
 
     scalar numWallPatches = patchSet_.size();
 
-    uTauMin = sqrt(uTauMin/numWallPatches);
-    uTauMax = sqrt(uTauMax/numWallPatches);
-    uTauAvg = sqrt(uTauAvg/numWallPatches);
+    scalar magUTauAvg = sqrt(mag(uTauAvg)/numWallPatches);
         
     if (Pstream::master())
     {
-            file() << mesh.time().timeName() << token::TAB
-                << token::TAB << uTauMin << token::TAB << uTauMax
-                << token::TAB << uTauAvg  << token::TAB;
+            file() << mesh.time().timeName() 
+                   << token::TAB
+                   << magUTauAvg;
     }
 
 
-     if (log_ == 1)
+     if (log_ > 0)
      {
-	Info<< "   Reff:  avg = " << uTauAvg << endl;
+	Info<< "uTau: " << mag(uTauAvg) << endl;
      }
-     else  if (log_ == 2)
+
+}
+
+void Foam::uTau::calcFrictionVelocity2
+(
+    const fvMesh& mesh,
+    const volSymmTensorField& Reff
+)
+{
+    vector uTauAvg(0.0, 0.0, 0.0);
+
+    forAllConstIter(labelHashSet, patchSet_, iter)
+    {
+        label patchI = iter.key();
+        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+
+        const vectorField& Sfp = mesh.Sf().boundaryField()[patchI];
+        const scalarField& magSfp = mesh.magSf().boundaryField()[patchI];
+        const vectorField nfp = -Sfp/magSfp;
+        const symmTensorField& Reffp = Reff.boundaryField()[patchI];
+
+        vectorField tsp = (nfp & Reffp); 
+        vectorField ssp = tsp - (nfp & tsp) * nfp; 
+
+        vector uTauAvgp = gAverage(ssp);
+        uTauAvg += uTauAvgp;
+
+        if (log_ > 2)
+        {
+            Info<< "  tauWall  avg(" << pp.name() << "): " 
+                << uTauAvgp << endl;
+        }
+    }
+
+
+    scalar numWallPatches = patchSet_.size();
+
+    scalar magUTauAvg = sqrt(mag(uTauAvg)/numWallPatches);
+        
+    if (Pstream::master())
+    {
+            file() << token::TAB 
+                   << magUTauAvg;
+    }
+
+
+     if (log_ > 0)
      {
-	Info<< "   Reff:  min/max/avg = " 
-                << uTauMin << ", " << uTauMax 
-		<< ", " << uTauAvg << endl;
+	Info<< "uTau: " << uTauAvg << endl;
      }
 
 }
@@ -137,9 +164,7 @@ void Foam::uTau::calcFrictionVelocity
 )
 {
     
-    uTauMin = 0.0;
-    uTauMax = 0.0;
-    uTauAvg = 0.0;
+    vector uTauAvg(0.0, 0.0, 0.0);
 
     forAllConstIter(labelHashSet, patchSet_, iter)
     {
@@ -147,46 +172,32 @@ void Foam::uTau::calcFrictionVelocity
         const polyPatch& pp = mesh.boundaryMesh()[patchI];
 
 
-        const vectorField wallGradU = -U.boundaryField()[patchI].snGrad();
-
-        scalar uTauMinp = gMin(nu*mag(wallGradU));
-        uTauMin += uTauMinp;
-
-        scalar uTauMaxp = gMax(nu*mag(wallGradU));
-        uTauMax += uTauMaxp;
-
-        scalar uTauAvgp = gAverage(nu*mag(wallGradU));
+        const vectorField wallGradU = -U.boundaryField()[patchI].snGrad() * nu.internalField();
+        
+        vector uTauAvgp = gAverage(wallGradU);
         uTauAvg += uTauAvgp;
 
         if (log_ > 2)
         {
-            Info<< " gradU:  min/max/avg(" << pp.name() << ") = "
-                << uTauMinp << ", " << uTauMaxp << ", " << uTauAvgp << endl;
+            Info<< " tauWall avg(" << pp.name() << "): "
+                <<  uTauAvgp << endl;
         }
     }
 
     scalar numWallPatches = patchSet_.size();
 
-    uTauMin = sqrt(uTauMin/numWallPatches);
-    uTauMax = sqrt(uTauMax/numWallPatches);
-    uTauAvg = sqrt(uTauAvg/numWallPatches);
+    scalar magUTauAvg = sqrt(mag(uTauAvg)/numWallPatches);
 
     if (Pstream::master())
     {
-            file() << token::TAB 
-                << token::TAB << uTauMin << token::TAB << uTauMax
-                << token::TAB << uTauAvg  << token::TAB << endl;
+            file() << token::TAB
+                   << magUTauAvg
+                   << endl;
     }
 
-   if (log_ == 1)
+   if (log_ > 0)
    {
-   	Info<< "  gradU:  avg = " << uTauAvg << endl;
-   }
-   else  if (log_ == 2)
-   {
-        Info<< "  gradU:  min/max/avg = "
-                << uTauMin << ", " << uTauMax
-                << ", " << uTauAvg << endl;
+   	Info<< "uTau: " << uTauAvg << endl;
    }
 
 }
@@ -348,6 +359,7 @@ void Foam::uTau::write()
                 mesh.lookupObject<icoModel>("turbulenceModel");
 
 	    calcFrictionVelocity(mesh, model.devReff());
+	    calcFrictionVelocity2(mesh, model.devReff());
             calcFrictionVelocity(mesh, U(), model.nu());
 
 
