@@ -34,12 +34,12 @@ private:
 
   IOdictionary thermoDict;
 
+  autoPtr<LESfilter> smoothingFilterPtr;
+  LESfilter& smoothingFilter;
 
-  autoPtr<LESfilter> filterPtr;
-  LESfilter& filter;
+  autoPtr<LESfilter> testFilterPtr;
+  LESfilter& testFilter;
 
-  autoPtr<LESfilter> filter2Ptr;
-  LESfilter& filter2;
   const dictionary LESfilterDict;
 
   static const label alpha=2;
@@ -50,12 +50,9 @@ protected:
   volScalarField viscLengthScale_;
   volSymmTensorField Ureynolds_;
   volVectorField uDelta_;
-  //volScalarField sgsDissipation_;
-  volScalarField testField;
-  volTensorField sgsDissipation_;
 
-  volScalarField Re_;
   volScalarField N_;
+  volScalarField Re_;
   volScalarField Cai_;
 
   HashTable<volScalarField&, word> registeredScalarFields_;
@@ -102,13 +99,9 @@ public:
     void updateSubGridScaleFields(const volSymmTensorField& S);
     void ReS(const volSymmTensorField& S);
     void ReU(const volSymmTensorField& S);
-    //
-    //void updateReS(const volSymmTensorField& S);
-    //void updateReU(const volSymmTensorField& S);
 
     void updateCai(const volSymmTensorField& S);
 
-    //tmp<volScalarField> Csgs(const volScalarField& Re);
     scalar Csgs() const;
     
     // Member Functions
@@ -165,11 +158,6 @@ public:
         //- Correct Eddy-Viscosity and related properties
         void correct(const tmp<volTensorField>& gradU);
 
-        //- Return number of cascade steps.
-        volScalarField N() const
-	{
-	   return N_;
-	}
 
         //- Return number of cascade steps.
         void updateN(const volSymmTensorField& S);
