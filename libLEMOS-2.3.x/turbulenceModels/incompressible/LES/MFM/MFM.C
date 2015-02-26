@@ -66,10 +66,11 @@ MFM::MFM
       "UsgsUsgs",
       runTime_.timeName(),
       mesh_,
-      IOobject::MUST_READ,
+      IOobject::NO_READ,
       IOobject::AUTO_WRITE
      ),
-      mesh_
+      mesh_,
+      dimensionedSymmTensor("UsgsUsgs", dimensionSet(0, 2, -2, 0, 0, 0, 0), pTraits<symmTensor>::zero)
   ),
   uDelta_
   (
@@ -167,11 +168,14 @@ void MFM::updateCai(const volSymmTensorField& S)
 {
   volSymmTensorField ss = dev(symm(fvc::grad(uDelta_)));
   
-  volScalarField Re = (max( mag(ss)*sqr(delta())/nu(), 1.0));
+  //volScalarField Re = (max( mag(ss)*sqr(delta())/nu(), 1.0));
+  volScalarField Re = (max( mag(S)*sqr(delta())/nu(), 1.0));
   //Re = Re/max(Re);
 
-  //Cai_= 1.0-pow(Re_,-3.0/16.0);
-  Cai_ = 2.0/constant::mathematical::pi * atan(Csgs()*(Re-1));
+  ////Cai_= 1.0-pow(Re,-3.0/16.0);
+  //Cai_ = 2.0/constant::mathematical::pi * atan(Csgs()*(Re-1));
+  //
+  Cai_ = 1.0-(1.0/(1+0.00204*pow(Re, 3))+(0.00143*pow(Re, 3))/(1+0.0005863*pow(Re, 4)));
  
    Info << "updating anisotropy factor: " << average(Cai_) << endl;
    Cai_.correctBoundaryConditions();
@@ -185,14 +189,14 @@ scalar MFM::Csgs() const
 
 tmp<volSymmTensorField> MFM::B() const
 {
-  return  symm(-(F1()*U()*uDelta_+ F1()*uDelta_*U()) - (sqr(F1())*uDelta_*uDelta_)) ;
+  return  dev(symm(-(F1()*U()*uDelta_+ F1()*uDelta_*U()) - (sqr(F1())*uDelta_*uDelta_))) ;
 }
 
 
 tmp<volScalarField> MFM::F1() const
 {
   return  Csgs()*Cai_*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
-//  return  Csgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+ //return  Csgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
 }
 
 
@@ -207,7 +211,7 @@ tmp<volScalarField> MFM::epsilon() const
 {
   return
   (
-     -(F1()*U()*uDelta_+ F1()*uDelta_*U() + sqr(F1())*uDelta_*uDelta_)
+     -dev(symm(F1()*U()*uDelta_+ F1()*uDelta_*U() + sqr(F1())*uDelta_*uDelta_))
      &&
      dev(symm(fvc::grad(U())))
   );
@@ -243,8 +247,11 @@ tmp<fvVectorMatrix> MFM::divDevReff(volVectorField& U) const
   return
   (
      - fvm::laplacian(nu(), U, "laplacian(nu,U)")
-     + fvm::div(phiDelta, U, "div(MFM)")
-     + fvc::div((F1()*U*uDelta_ + sqr(F1()*uDelta_)),  "div(MFM)")
+     + fvm::div(phiDelta, U, "div(MFM1)")
+     - fvc::div(nu()*dev(T(fvc::grad(U))))
+     + fvc::div((F1()*U*uDelta_ + sqr(F1()*uDelta_)),  "div(MFM2)")
+     //+ fvc::div(smoothingFilter(F1()*uDelta_*U + F1()*U*uDelta_ + sqr(F1()*uDelta_)),  "div(MFM2)")
+     //+ fvc::div((F1()*uDelta_*U + F1()*U*uDelta_ + sqr(F1()*uDelta_)),  "div(MFM2)")
   );
 }
 
@@ -292,9 +299,8 @@ tmp<fvScalarMatrix> MFM::divFeff(volScalarField &f) const
 {
   return
      (
-      fvm::laplacian((laminarDiffusivity_[f.name()] + *turbulentDiffusivity_[f.name()]), f, "laplacian(Deff,F)")
-      - fvc::div((*LeoPhi_[f.name()]))
-      );
+      -fvm::laplacian(*turbulentDiffusivity_[f.name()], f, "laplacian(Deff,F)")
+     );
 }
 
 tmp<fvScalarMatrix> MFM::divFsgs(volScalarField &f) const
@@ -302,7 +308,6 @@ tmp<fvScalarMatrix> MFM::divFsgs(volScalarField &f) const
   return
      (
       fvm::laplacian((*turbulentDiffusivity_[f.name()]), f, "laplacian(Deff,F)")
-      - fvc::div((*LeoPhi_[f.name()]))
       );
 }
 
@@ -311,7 +316,7 @@ void MFM::correct(const tmp<volTensorField>& gradU)
 {
   LESModel::correct(gradU);
 
-  uDelta_ = U()-testFilter(U());
+  uDelta_ = U() - testFilter(U());
 
   viscLengthScale_ = F1();
   Ureynolds_ = B();
