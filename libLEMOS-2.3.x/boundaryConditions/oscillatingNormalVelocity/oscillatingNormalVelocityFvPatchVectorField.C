@@ -231,11 +231,6 @@ void oscillatingNormalVelocityFvPatchVectorField::rmap
 )
 {
     fixedValueFvPatchField<vector>::rmap(ptf, addr);
-
-    const oscillatingNormalVelocityFvPatchVectorField& tiptf =
-        refCast<const oscillatingNormalVelocityFvPatchVectorField >(ptf);
-
-    fixedValue_.rmap(tiptf.fixedValue_, addr);
 }
 
 
