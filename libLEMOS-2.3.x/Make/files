@@ -22,6 +22,11 @@ $(cellToCellExt)/globalIndexStencils/cellToCellExtStencil.C
 $(cellToCellExt)/globalIndexStencils/CPCCellToCellExtStencil.C
 $(cellToCellExt)/MeshObjects/centredCPCCellToCellExtStencilObject.C
 
+fvOptions/sources/derived/plasmaActuationBodyForceSource/plasmaActuationBodyForce.C
+fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModelNew.C
+fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModel.C
+
+
 turbulenceModels/LES/LESfilters/weightedArithmeticMeanFilter/weightedArithmeticMeanFilter.C
 turbulenceModels/LES/LESfilters/volWeightedArithmeticMeanFilter/volWeightedArithmeticMeanFilter.C
 turbulenceModels/LES/LESfilters/medianFilter/medianFilter.C
