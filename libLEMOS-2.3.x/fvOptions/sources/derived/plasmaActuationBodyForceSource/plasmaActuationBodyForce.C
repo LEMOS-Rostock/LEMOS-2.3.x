@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "plasmaActuationBodyForce.H"
+#include "bodyForceModel.H"
 #include "fvMatrices.H"
 #include "DimensionedField.H"
 #include "IFstream.H"
@@ -59,7 +60,7 @@ Foam::fv::plasmaActuationBodyForce::plasmaActuationBodyForce
 )
 :
     option(sourceName, modelType, dict, mesh),
-    bodyForce_(bodyForceModel::New(*this, coeffs_)),
+    bodyForce_(bodyForceModel::New(*this, coeffs_))
 {
     fieldNames_.setSize(1);
     fieldNames_[0]="U";

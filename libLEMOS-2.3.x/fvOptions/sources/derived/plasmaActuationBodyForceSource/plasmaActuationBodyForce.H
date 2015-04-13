@@ -50,7 +50,7 @@ SourceFiles
 #ifndef plasmaActuationBodyForce_H
 #define plasmaActuationBodyForce_H
 
-#include "autoPtr.H"
+//#include "autoPtr.H"
 #include "topoSetSource.H"
 #include "cellSet.H"
 #include "fvMesh.H"
