@@ -26,6 +26,7 @@ fvOptions/sources/derived/plasmaActuationBodyForceSource/plasmaActuationBodyForc
 fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModelNew.C
 fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModel.C
 fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/kinematic/kinematic.C
+fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/exponential/exponential.C
 
 
 turbulenceModels/LES/LESfilters/weightedArithmeticMeanFilter/weightedArithmeticMeanFilter.C

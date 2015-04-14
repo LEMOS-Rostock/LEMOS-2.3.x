@@ -55,7 +55,7 @@ class exponential
 private:
     
     //- Drag coefficients along the coordinate directions
-    vector CD_;
+    vector D_;
 
     //- Constant 1
     List<scalar> Cx_;
@@ -69,8 +69,14 @@ private:
     //- Maximal force
     vector fMax_;
 
+    //- Body force field
+    tmp<vectorField> Su_;
+
+    //- Correct body force field
+    bool correct_;
+
     //- Determine axial length of cellset
-    scalar calcAxialLength() const;
+    void calcForceField();
 
     //- Compute body force
     tmp<vectorField> computeSup(fvMatrix<vector>& eqn);
