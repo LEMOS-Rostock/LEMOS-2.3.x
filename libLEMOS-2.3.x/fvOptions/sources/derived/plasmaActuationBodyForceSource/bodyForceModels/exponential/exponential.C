@@ -47,6 +47,8 @@ Foam::scalar Foam::exponential::calcAxialLength() const
   vector max = boundBox(UIndirectList<vector>(mesh_.C(), cells_)()).max();
 
   vectorField cellCenters(UIndirectList<vector>(mesh_.C(), cells_)());
+
+  tmp<vectorField> bodyForce(new vectorField(cells_.size(), vector::zero));
  
   forAll(cellCenters, cellI)
   {
@@ -58,6 +60,9 @@ Foam::scalar Foam::exponential::calcAxialLength() const
       tcf.z() =  (min.z() - cf.z())/ (min.z() - max.z());
 
 
+      bodyForce()[cellI].x() = fMax_.x() * (Cx_[0]+Cx_[1]*tcf.x()+Cx_[2]*sqr(tcf.x()))*exp(-1.0*Cx_[3]*pow(tcf.x(), Cx_[4]));
+      bodyForce()[cellI].y() = fMax_.y() * (Cy_[0]+Cy_[1]*tcf.y()+Cy_[2]*sqr(tcf.y()))*exp(-1.0*Cy_[3]*pow(tcf.y(), Cy_[4]));
+      bodyForce()[cellI].z() = fMax_.z() * (Cz_[0]+Cz_[1]*tcf.z()+Cz_[2]*sqr(tcf.z()))*exp(-1.0*Cz_[3]*pow(tcf.z(), Cz_[4]));
       
   }
 
@@ -88,10 +93,7 @@ Foam::exponential::exponential
     const labelList& cells
 )
 :
-    bodyForceModel(dbd, dict, typeName, mesh, cells),
-    Cx_(readList<scalar>(dict.lookup("Cx"))),
-    Cy_(readList<scalar>(dict.lookup("Cy"))),
-    Cz_(readList<scalar>(dict.lookup("Cz")))
+    bodyForceModel(dbd, dict, typeName, mesh, cells)
 {
     read(dict);
 }

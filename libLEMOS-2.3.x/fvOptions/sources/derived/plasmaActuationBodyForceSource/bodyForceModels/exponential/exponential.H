@@ -67,7 +67,7 @@ private:
     List<scalar> Cz_;
 
     //- Maximal force
-    scalar fMax_;
+    vector fMax_;
 
     //- Determine axial length of cellset
     scalar calcAxialLength() const;
