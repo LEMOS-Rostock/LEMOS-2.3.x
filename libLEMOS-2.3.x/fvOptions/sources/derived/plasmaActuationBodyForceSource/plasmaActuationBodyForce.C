@@ -60,7 +60,7 @@ Foam::fv::plasmaActuationBodyForce::plasmaActuationBodyForce
 )
 :
     option(sourceName, modelType, dict, mesh),
-    bodyForce_(bodyForceModel::New(*this, coeffs_))
+    bodyForce_(bodyForceModel::New(*this, coeffs_, mesh, cells_))
 {
     fieldNames_.setSize(1);
     fieldNames_[0]="U";
@@ -115,6 +115,8 @@ void Foam::fv::plasmaActuationBodyForce::addSup
         dimensionedVector("zero", eqn.dimensions()/dimVolume, vector::zero)
     );
 
+    UIndirectList<vector>(Su, cells_) = bodyForce_->computeSup(eqn);
+
     eqn += Su;
 }
 
@@ -139,6 +141,8 @@ void Foam::fv::plasmaActuationBodyForce::addSup
         mesh_,
         dimensionedVector("zero", eqn.dimensions()/dimVolume, vector::zero)
     );
+
+    UIndirectList<vector>(Su, cells_) = rho*bodyForce_->computeSup(eqn);
 
     eqn += Su;
 }

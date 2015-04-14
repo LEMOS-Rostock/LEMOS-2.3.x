@@ -30,7 +30,9 @@ License
 Foam::autoPtr<Foam::bodyForceModel> Foam::bodyForceModel::New
 (
     const fv::plasmaActuationBodyForce& dbd,
-    const dictionary& dict
+    const dictionary& dict,
+    const fvMesh& mesh,
+    const labelList& cells
 )
 {
     const word modelType(dict.lookup(typeName));
@@ -52,7 +54,7 @@ Foam::autoPtr<Foam::bodyForceModel> Foam::bodyForceModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<bodyForceModel>(cstrIter()(dbd, dict));
+    return autoPtr<bodyForceModel>(cstrIter()(dbd, dict, mesh, cells));
 }
 
 

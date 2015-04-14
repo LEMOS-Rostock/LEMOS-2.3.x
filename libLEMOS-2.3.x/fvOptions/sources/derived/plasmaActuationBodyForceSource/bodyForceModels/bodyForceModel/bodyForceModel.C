@@ -40,11 +40,15 @@ Foam::bodyForceModel::bodyForceModel
 (
     const fv::plasmaActuationBodyForce& dbd,
     const dictionary& dict,
-    const word& name
+    const word& name,
+    const fvMesh& mesh,
+    const labelList& cells
 )
 :
     dbd_(dbd),
     name_(name),
+    mesh_(mesh),
+    cells_(cells),
     coeffs_(dictionary::null)
 {
     read(dict);
@@ -58,9 +62,11 @@ Foam::bodyForceModel::~bodyForceModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::bodyForceModel::read(const dictionary& dict)
+bool Foam::bodyForceModel::read(const dictionary& dict)
 {
     coeffs_ = dict.subDict(name_ + "Coeffs");
+
+    return true;
 }
 
 

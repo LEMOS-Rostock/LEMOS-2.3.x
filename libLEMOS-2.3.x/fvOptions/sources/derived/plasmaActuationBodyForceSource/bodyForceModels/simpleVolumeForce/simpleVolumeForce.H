@@ -22,22 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::bodyForceModel
+    Foam::simpleVolumeForce
 
 Description
-    Trim model base class
+    Fixed trim coefficients
 
 SourceFiles
-    bodyForceModel.C
+    simpleVolumeForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bodyForceModel_H
-#define bodyForceModel_H
+#ifndef simpleVolumeForce_H
+#define simpleVolumeForce_H
 
-#include "plasmaActuationBodyForce.H"
-#include "dictionary.H"
-#include "runTimeSelectionTables.H"
+#include "bodyForceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,98 +43,53 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class bodyForceModel Declaration
+                         Class simpleVolumeForce Declaration
 \*---------------------------------------------------------------------------*/
 
-class bodyForceModel
+class simpleVolumeForce
+:
+    public bodyForceModel
 {
 
-protected:
+private:
+    
+    //- Drag coefficients along the coordinate directions
+    vector CD_;
 
-    // Protected data
+    //- Determine axial length of cellset
+    scalar calcAxialLength() const;
 
-        //- Reference to the rotor source model
-        const fv::plasmaActuationBodyForce& dbd_;
-
-        //- Name of model
-        const word name_;
-
-        //- Reference to fvMesh
-        const fvMesh& mesh_;
-
-        //- Reference to cellset
-        const labelList& cells_;
-
-        //- Coefficients dictionary
-        dictionary coeffs_;
+    //- Compute body force
+    tmp<vectorField> computeSup(fvMatrix<vector>& eqn);
 
 
 public:
 
     //- Run-time type information
-    TypeName("bodyForceModel");
+    TypeName("simpleVolumeForce");
 
-
-    // Declare runtime constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            bodyForceModel,
-            dictionary,
-            (
-                const fv::plasmaActuationBodyForce& dbd,
-                const dictionary& dict,
-                const fvMesh& mesh,
-                const labelList& cells
-            ),
-            (dbd, dict, mesh, cells)
-        );
-
-
-    // Constructors
-
-        //- Construct from components
-        bodyForceModel
-        (
-            const fv::plasmaActuationBodyForce& dbd,
-            const dictionary& dict,
-            const word& name,
-            const fvMesh& mesh,
-            const labelList& cells
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected trim model
-        static autoPtr<bodyForceModel> New
-        (
-            const fv::plasmaActuationBodyForce& dbd,
-            const dictionary& dict,
-            const fvMesh& mesh,
-            const labelList& cells
-        );
-
+    //- Constructor
+    simpleVolumeForce(const fv::plasmaActuationBodyForce& dbd, 
+                      const dictionary& dict,
+                      const fvMesh& mesh,
+                      const labelList& cells
+                     );
 
     //- Destructor
-    virtual ~bodyForceModel();
+    virtual ~simpleVolumeForce();
 
 
     // Member functions
 
         //- Read
-        virtual bool read(const dictionary& dict);
-
-        //- Compute body force
-        virtual tmp<vectorField> computeSup(fvMatrix<vector>& eqn) = 0;
+        bool read(const dictionary& dict);
 /*
         //- Correct the model
         virtual void correct
         (
             const vectorField& U,
             vectorField& force
-        ) = 0;
+        );
 
         //- Correct the model for compressible flow
         virtual void correct
@@ -144,7 +97,7 @@ public:
             const volScalarField rho,
             const vectorField& U,
             vectorField& force
-        ) = 0;
+        );
 */
 };
 
