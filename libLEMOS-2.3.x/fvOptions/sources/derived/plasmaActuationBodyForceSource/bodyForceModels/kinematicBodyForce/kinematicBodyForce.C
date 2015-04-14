@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "simpleBodyForce.H"
+#include "kinematicBodyForce.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 #include "DimensionedField.H"
@@ -35,19 +35,19 @@ using namespace Foam::constant;
 
 namespace Foam
 {
-    defineTypeNameAndDebug(simpleBodyForce, 0);
+    defineTypeNameAndDebug(kinematicBodyForce, 0);
 
-    addToRunTimeSelectionTable(bodyForceModel, simpleBodyForce, dictionary);
+    addToRunTimeSelectionTable(bodyForceModel, kinematicBodyForce, dictionary);
 }
 
 
-Foam::scalar Foam::simpleBodyForce::calcAxialLength() const
+Foam::scalar Foam::kinematicBodyForce::calcAxialLength() const
 {
   scalar mCD=mag(CD_);
 
   if (mCD < SMALL)
   {
-      FatalErrorIn("Foam::fv::plasmaActuatorBodyForce::simpleBodyForce::calcAxialLength() const")
+      FatalErrorIn("Foam::fv::plasmaActuatorBodyForce::kinematicBodyForce::calcAxialLength() const")
           <<"CD vector has zero length!"<<endl
           <<abort(FatalError);
   }
@@ -62,7 +62,7 @@ Foam::scalar Foam::simpleBodyForce::calcAxialLength() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simpleBodyForce::simpleBodyForce
+Foam::kinematicBodyForce::kinematicBodyForce
 (
     const fv::plasmaActuationBodyForce& dbd,
     const dictionary& dict,
@@ -78,13 +78,13 @@ Foam::simpleBodyForce::simpleBodyForce
 
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
-Foam::simpleBodyForce::~simpleBodyForce()
+Foam::kinematicBodyForce::~kinematicBodyForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::simpleBodyForce::read(const dictionary& dict)
+bool Foam::kinematicBodyForce::read(const dictionary& dict)
 {
   if (bodyForceModel::read(dict))
   {
@@ -101,7 +101,7 @@ bool Foam::simpleBodyForce::read(const dictionary& dict)
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::simpleBodyForce::computeSup(fvMatrix<vector>& eqn)
+Foam::tmp<Foam::vectorField> Foam::kinematicBodyForce::computeSup(fvMatrix<vector>& eqn)
 {
     tmp<vectorField> Su(new vectorField(cells_.size(), vector::zero));
 
@@ -114,7 +114,7 @@ Foam::tmp<Foam::vectorField> Foam::simpleBodyForce::computeSup(fvMatrix<vector>&
 
 
 /*
-void Foam::simpleBodyForce::correct
+void Foam::kinematicBodyForce::correct
 (
     const vectorField& U,
     vectorField& force
@@ -124,7 +124,7 @@ void Foam::simpleBodyForce::correct
 }
 
 
-void Foam::simpleBodyForce::correct
+void Foam::kinematicBodyForce::correct
 (
     const volScalarField rho,
     const vectorField& U,

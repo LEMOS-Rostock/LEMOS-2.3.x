@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::simpleBodyForce
+    Foam::kinematicBodyForce
 
 Description
     Fixed trim coefficients
 
 SourceFiles
-    simpleBodyForce.C
+    kinematicBodyForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef simpleBodyForce_H
-#define simpleBodyForce_H
+#ifndef kinematicBodyForce_H
+#define kinematicBodyForce_H
 
 #include "bodyForceModel.H"
 
@@ -43,10 +43,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class simpleBodyForce Declaration
+                         Class kinematicBodyForce Declaration
 \*---------------------------------------------------------------------------*/
 
-class simpleBodyForce
+class kinematicBodyForce
 :
     public bodyForceModel
 {
@@ -66,17 +66,17 @@ private:
 public:
 
     //- Run-time type information
-    TypeName("simpleBodyForce");
+    TypeName("kinematic");
 
     //- Constructor
-    simpleBodyForce(const fv::plasmaActuationBodyForce& dbd, 
+    kinematicBodyForce(const fv::plasmaActuationBodyForce& dbd, 
                       const dictionary& dict,
                       const fvMesh& mesh,
                       const labelList& cells
                      );
 
     //- Destructor
-    virtual ~simpleBodyForce();
+    virtual ~kinematicBodyForce();
 
 
     // Member functions
