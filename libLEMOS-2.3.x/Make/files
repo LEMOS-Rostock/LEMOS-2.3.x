@@ -25,7 +25,7 @@ $(cellToCellExt)/MeshObjects/centredCPCCellToCellExtStencilObject.C
 fvOptions/sources/derived/plasmaActuationBodyForceSource/plasmaActuationBodyForce.C
 fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModelNew.C
 fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/bodyForceModel/bodyForceModel.C
-fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/kinemticBodyForce/kinematicBodyForce.C
+fvOptions/sources/derived/plasmaActuationBodyForceSource/bodyForceModels/kinematicBodyForce/kinematicBodyForce.C
 
 
 turbulenceModels/LES/LESfilters/weightedArithmeticMeanFilter/weightedArithmeticMeanFilter.C
