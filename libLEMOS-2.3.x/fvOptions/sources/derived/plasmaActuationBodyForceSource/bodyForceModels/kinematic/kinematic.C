@@ -54,7 +54,7 @@ Foam::scalar Foam::kinematic::calcAxialLength() const
 
   vector el=CD_/mCD;
 
-  scalar l = el & boundBox(UIndirectList<vector>(mesh_.C(), cells_)()).span();
+  scalar l = mag(el & boundBox(UIndirectList<vector>(mesh_.C(), cells_)()).span());
 
   return l;
 }
