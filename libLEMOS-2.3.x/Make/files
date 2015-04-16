@@ -58,6 +58,8 @@ postProcessing/functionObjects/utilities/energyDissipationRate/energyDissipation
 postProcessing/functionObjects/utilities/energyDissipationRate/energyDissipationRateFunctionObject.C
 postProcessing/functionObjects/field/fieldAverageExt/fieldAverageExt/fieldAverageExt.C
 postProcessing/functionObjects/field/fieldAverageExt/fieldAverageExtFunctionObject/fieldAverageExtFunctionObject.C
+postProcessing/functionObjects/utilities/extendedForces/extendedForces.C
+postProcessing/functionObjects/utilities/extendedForces/extendedForcesFunctionObject.C
 
 
 postProcessing/POD/PODEigenBase/PODEigenBase.C
