@@ -36,4 +36,5 @@ LIB_LIBS = \
  -lmeshTools \
  -lsampling \ 
  -lfileFormats \
+ -lforces \
  -lfvOptions 
