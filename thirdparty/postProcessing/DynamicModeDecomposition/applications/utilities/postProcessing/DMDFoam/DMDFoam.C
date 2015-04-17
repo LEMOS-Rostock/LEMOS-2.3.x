@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
             addSnapshotsToPtrList(mesh, runTime, timeIndices, Times, startTime, endTime, nSnapshots, fields, fieldName);
             
             // Create DMD base
-            DMD.calcBase(fields, 1.0);
+            DMD.calcBase(fields);
 
             if(reconstruct)
             { 
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
             addSnapshotsToPtrList(mesh, runTime, timeIndices, Times, startTime, endTime, nSnapshots, fields, fieldName);
             
             // Create DMD base
-            DMD.calcBase(fields, 1.0);
+            DMD.calcBase(fields);
  
             if(reconstruct)
             { 
@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
             addSnapshotsToPtrList(mesh, runTime, timeIndices, Times, startTime, endTime, nSnapshots, fields, fieldName);
             
             // Create DMD base
-            DMD.calcBase(fields, 1.0);
+            DMD.calcBase(fields);
  
             if(reconstruct)
             { 
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
             addSnapshotsToPtrList(mesh, runTime, timeIndices, Times, startTime, endTime, nSnapshots, fields, fieldName);
             
             // Create DMD base
-            DMD.calcBase(fields, 1.0);
+            DMD.calcBase(fields);
  
             if(reconstruct)
             { 
