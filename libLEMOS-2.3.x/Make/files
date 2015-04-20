@@ -39,6 +39,7 @@ turbulenceModels/LES/LESfilters/volWeightedGaussianFilter/volWeightedGaussianFil
 turbulenceModels/LES/LESfilters/differentialFilter/differentialFilter.C
 turbulenceModels/LES/LESfilters/parabolicFilter/parabolicFilter.C
 turbulenceModels/LES/LESfilters/lagrangianFilter/lagrangianFilter.C
+turbulenceModels/LES/LESfilters/simpleGridFilter/simpleGridFilter.C
 turbulenceModels/incompressible/HYBRID/hybKOmegaSST/hybKOmegaSST.C
 turbulenceModels/incompressible/HYBRID/hybDynV2F/hybDynV2F.C
 /*turbulenceModels/incompressible/HYBRID/hybKOmegaSSTdynOneEqEddy/hybKOmegaSSTdynOneEqEddy.C*/
