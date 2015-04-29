@@ -57,8 +57,8 @@ protected:
 
   HashTable<volScalarField&, word> registeredScalarFields_;
   HashTable<volScalarField, word> laminarDiffusivity_;
-  HashPtrTable<volScalarField, word> turbulentDiffusivity_;
-  HashPtrTable<volVectorField,word> LeoPhi_;
+  HashTable<volScalarField, word> deltaScalarFields_;
+  HashTable<volScalarField, word> NScalarFields_;
 
 public:
 
@@ -102,7 +102,8 @@ public:
 
     void updateCai(const volSymmTensorField& S);
 
-    scalar Csgs() const;
+    scalar Bsgs() const;
+    scalar Dsgs() const;
     
     // Member Functions
     
@@ -110,6 +111,9 @@ public:
 
         //- Return B.
         tmp<volSymmTensorField> B() const;
+
+        //- Return B.
+        tmp<volScalarField> D() const;
 
         tmp<volScalarField> F1() const;
 
@@ -176,7 +180,6 @@ public:
 
         tmp<volScalarField> molecularDiffusivityCoeff(word name) const;
 
-        tmp<volScalarField> turbulentDiffusivityCoeff(word name) const;
 	
         //- Read turbulenceProperties dictionary
         bool read();

@@ -173,7 +173,7 @@ void MFM::updateCai(const volSymmTensorField& S)
   //Re = Re/max(Re);
 
   ////Cai_= 1.0-pow(Re,-3.0/16.0);
-  //Cai_ = 2.0/constant::mathematical::pi * atan(Csgs()*(Re-1));
+  //Cai_ = 2.0/constant::mathematical::pi * atan(Bsgs()*(Re-1));
   //
   Cai_ = 1.0-(1.0/(1+0.00204*pow(Re, 3))+(0.00143*pow(Re, 3))/(1+0.0005863*pow(Re, 4)));
  
@@ -182,9 +182,9 @@ void MFM::updateCai(const volSymmTensorField& S)
 }
 
 
-scalar MFM::Csgs() const
+scalar MFM::Bsgs() const
 {
-   return readScalar(thermoDict.lookup("Csgs"));
+   return readScalar(thermoDict.lookup("Bsgs"));
 }
 
 tmp<volSymmTensorField> MFM::B() const
@@ -195,8 +195,8 @@ tmp<volSymmTensorField> MFM::B() const
 
 tmp<volScalarField> MFM::F1() const
 {
-  return  Csgs()*Cai_*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
- //return  Csgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+  return  Bsgs()*Cai_*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+ //return  Bsgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
 }
 
 
@@ -270,6 +270,17 @@ tmp<fvVectorMatrix> MFM::divDevRhoReff
     );
 }
 
+tmp<volScalarField> MFM::D() const
+{
+  return  Dsgs()*pow((1-pow(alpha,-4.0/3.0)),-0.5)*pow(2.0,-2.0/3.0*N_)*sqrt(pow(2.0,4.0/3.0*N_)-1.0);
+}
+
+scalar MFM::Dsgs() const
+{
+   return gAverage(Cai_)*Bsgs();
+}
+
+
 tmp<volScalarField> MFM::molecularDiffusivityCoeff(word name) const
 {
   return
@@ -278,37 +289,26 @@ tmp<volScalarField> MFM::molecularDiffusivityCoeff(word name) const
      );
 }
 
-tmp<volScalarField> MFM::turbulentDiffusivityCoeff(word name) const
-{
-  return
-    (
-     *turbulentDiffusivity_[name]
-     );
-}
 
 tmp<volVectorField> MFM::Feff(const volScalarField &f) const
 {
   return
     (
-      *LeoPhi_[f.name()] - ( laminarDiffusivity_[f.name()] + *turbulentDiffusivity_[f.name()] ) * fvc::grad(f)
+      - ( laminarDiffusivity_[f.name()] ) * fvc::grad(f)
      );
 }
 
 
 tmp<fvScalarMatrix> MFM::divFeff(volScalarField &f) const
 {
-  return
-     (
-      -fvm::laplacian(*turbulentDiffusivity_[f.name()], f, "laplacian(Deff,F)")
-     );
-}
+    surfaceScalarField phiDelta = fvc::interpolate(F1()*uDelta_)&U().mesh().Sf();
 
-tmp<fvScalarMatrix> MFM::divFsgs(volScalarField &f) const
-{
   return
      (
-      fvm::laplacian((*turbulentDiffusivity_[f.name()]), f, "laplacian(Deff,F)")
-      );
+      - fvm::laplacian(laminarDiffusivity_[f.name()], f, "laplacian(Deff,F)")
+      + fvm::div(phiDelta, f, "div(MFM1)")
+      + fvc::div(D()*U() * (deltaScalarFields_[f.name()]) + F1()*D()*uDelta_*(deltaScalarFields_[f.name()]))
+     );
 }
 
 
@@ -317,6 +317,13 @@ void MFM::correct(const tmp<volTensorField>& gradU)
   LESModel::correct(gradU);
 
   uDelta_ = U() - testFilter(U());
+   
+  for ( HashTable<volScalarField&,word>::iterator iter=registeredScalarFields_.begin(); iter!=registeredScalarFields_.end(); iter++ )
+  {
+      const volScalarField& registeredScalarField = iter();
+
+      deltaScalarFields_[registeredScalarField.name()] = registeredScalarField-testFilter(registeredScalarField);
+  } 
 
   viscLengthScale_ = F1();
   Ureynolds_ = B();
@@ -339,6 +346,14 @@ void MFM::updateN(const volSymmTensorField& S)
 
     N_.internalField() = log(tmp)/log(2.0);
     N_.correctBoundaryConditions();
+
+
+    for ( HashTable<volScalarField&,word>::iterator iter=registeredScalarFields_.begin(); iter!=registeredScalarFields_.end(); iter++ )
+    {
+        const volScalarField& registeredScalarField = iter();
+      
+        NScalarFields_[registeredScalarField.name()].internalField() = log(tmp * pow(laminarDiffusivity_[registeredScalarField.name()]/nu(), 0.5))/log(2.0) ;
+    }
 
     Info << "updating number of cascade steps: " << average(N_) << endl;
 }
@@ -374,44 +389,40 @@ void MFM::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoef
           )
         );
 
-        turbulentDiffusivity_.insert
-        (
-          name,
-          new volScalarField (
+        deltaScalarFields_.insert
+        ( 
+            name,
+            volScalarField
+            (
                 IOobject
                 (
-                        "Dt_"+name,
-                        f.time().timeName(),
-                        f.mesh(),
-                        IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
+                    name+"Delta",
+                    f.time().timeName(),
+                    f.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                f-testFilter(f)
+            )
+        );
+
+        NScalarFields_.insert
+        (
+            name,
+            volScalarField
+            (
+                IOobject
+                (
+                    "N_"+name,
+                    f.time().timeName(),
+                    f.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 f.mesh(),
-                dimensionedScalar("Dt_"+name,dimensionSet(0,2,-1,0,0,0,0), 0.0)
-          )
+                dimensionedScalar("N_"+name,dimless, 0.0)
+            )
         );
-
-
-        LeoPhi_.insert
-        (
-                name,
-                new volVectorField
-                (
-                        IOobject
-                        (
-                                "leonardScalarFlux_" + name,
-                                runTime_.timeName(),
-                                mesh_,
-                                IOobject::NO_READ,
-                                IOobject::NO_WRITE
-                        ),
-                        mesh_,
-                        dimensionedVector("zero",  dimensionSet(0,1,-1,0,0,0,0) * f.dimensions() , pTraits<vector>::zero)
-                )
-        );
-
-
-
 }
 
 //Abschluss
