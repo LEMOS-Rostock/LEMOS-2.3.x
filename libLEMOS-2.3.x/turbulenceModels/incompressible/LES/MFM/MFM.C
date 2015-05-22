@@ -400,7 +400,7 @@ void MFM::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoef
                     f.time().timeName(),
                     f.mesh(),
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::AUTO_WRITE
                 ),
                 f-testFilter(f)
             )
@@ -417,7 +417,7 @@ void MFM::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoef
                     f.time().timeName(),
                     f.mesh(),
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::AUTO_WRITE
                 ),
                 f.mesh(),
                 dimensionedScalar("N_"+name,dimless, 0.0)
