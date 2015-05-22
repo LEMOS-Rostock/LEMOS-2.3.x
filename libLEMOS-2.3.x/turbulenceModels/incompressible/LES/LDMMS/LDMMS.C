@@ -395,8 +395,8 @@ tmp<fvScalarMatrix> LDMMS::divFeff(volScalarField &f) const
 {
   return
      (
-      fvm::laplacian((laminarDiffusivity_[f.name()] + *turbulentDiffusivity_[f.name()]), f, "laplacian(Deff,F)")
-      - fvc::div((*LeoPhi_[f.name()]))
+      - fvm::laplacian((laminarDiffusivity_[f.name()] + *turbulentDiffusivity_[f.name()]), f, "laplacian(Deff,F)")
+      + fvc::div((*LeoPhi_[f.name()]))
       );
 }
 
@@ -562,9 +562,9 @@ void LDMMS::correct(const tmp<volTensorField>& gradU)
 void LDMMS::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoeff) 
 {
 
+	Info << "register ScalarField " << endl;
 	word name = f.name();
 
-	Info << "register ScalarField " <<  name << endl;
 
 	registeredScalarFields_.insert
 	(
