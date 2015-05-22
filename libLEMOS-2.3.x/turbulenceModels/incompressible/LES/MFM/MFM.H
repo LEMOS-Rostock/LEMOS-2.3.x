@@ -57,8 +57,8 @@ protected:
 
   HashTable<volScalarField&, word> registeredScalarFields_;
   HashTable<volScalarField, word> laminarDiffusivity_;
-  HashTable<volScalarField, word> deltaScalarFields_;
-  HashTable<volScalarField, word> NScalarFields_;
+  HashPtrTable<volScalarField, word> deltaScalarFields_;
+  HashPtrTable<volScalarField, word> NScalarFields_;
 
 public:
 

@@ -307,7 +307,7 @@ tmp<fvScalarMatrix> MFM::divFeff(volScalarField &f) const
      (
       - fvm::laplacian(laminarDiffusivity_[f.name()], f, "laplacian(Deff,F)")
       + fvm::div(phiDelta, f, "div(MFM1)")
-      + fvc::div(D()*U() * (deltaScalarFields_[f.name()]) + F1()*D()*uDelta_*(deltaScalarFields_[f.name()]))
+      + fvc::div(D()*U() * (*deltaScalarFields_[f.name()]) + F1()*D()*uDelta_*(*deltaScalarFields_[f.name()]))
      );
 }
 
@@ -322,7 +322,7 @@ void MFM::correct(const tmp<volTensorField>& gradU)
   {
       const volScalarField& registeredScalarField = iter();
 
-      deltaScalarFields_[registeredScalarField.name()] = registeredScalarField-testFilter(registeredScalarField);
+      (*deltaScalarFields_[registeredScalarField.name()]) = registeredScalarField-testFilter(registeredScalarField);
   } 
 
   viscLengthScale_ = F1();
@@ -352,7 +352,7 @@ void MFM::updateN(const volSymmTensorField& S)
     {
         const volScalarField& registeredScalarField = iter();
       
-        NScalarFields_[registeredScalarField.name()].internalField() = log(tmp * pow(laminarDiffusivity_[registeredScalarField.name()]/nu(), 0.5))/log(2.0) ;
+        (*NScalarFields_[registeredScalarField.name()]).internalField() = log(tmp * pow(nu()/laminarDiffusivity_[registeredScalarField.name()], 0.5))/log(2.0) ;
     }
 
     Info << "updating number of cascade steps: " << average(N_) << endl;
@@ -392,7 +392,7 @@ void MFM::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoef
         deltaScalarFields_.insert
         ( 
             name,
-            volScalarField
+            new volScalarField
             (
                 IOobject
                 (
@@ -402,14 +402,17 @@ void MFM::registerScalarField(volScalarField &f, scalar molecularDiffusivityCoef
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
-                f-testFilter(f)
+                f.mesh(),
+                dimensionedScalar(name+"Delta",f.dimensions(), 0.0)
             )
         );
+
+        (*deltaScalarFields_[name]) = f-testFilter(f);
 
         NScalarFields_.insert
         (
             name,
-            volScalarField
+            new volScalarField
             (
                 IOobject
                 (
