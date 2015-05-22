@@ -123,7 +123,13 @@ tmp<volScalarField> simpleGridFilter::operator()
 	}
     }
 
-    filteredField /= fvc::surfaceSum(mesh().magSf());
+    volScalarField ssum=fvc::surfaceSum(mesh().magSf());
+    
+    forAll(ssum, cellI)
+    {
+      filteredField[cellI]/=ssum[cellI];
+    }
+    filteredField.correctBoundaryConditions();
    
     unFilteredField.clear();
     return tfilteredField;
@@ -187,7 +193,13 @@ tmp<volVectorField> simpleGridFilter::operator()
 	}
     }
 
-    filteredField /= fvc::surfaceSum(mesh().magSf());
+    volScalarField ssum=fvc::surfaceSum(mesh().magSf());
+    
+    forAll(ssum, cellI)
+    {
+      filteredField[cellI]/=ssum[cellI];
+    }
+    filteredField.correctBoundaryConditions();
 
     unFilteredField.clear();
 
@@ -252,7 +264,13 @@ tmp<volSymmTensorField> simpleGridFilter::operator()
 	}
     }
 
-    filteredField /= fvc::surfaceSum(mesh().magSf());
+    volScalarField ssum=fvc::surfaceSum(mesh().magSf());
+    
+    forAll(ssum, cellI)
+    {
+      filteredField[cellI]/=ssum[cellI];
+    }
+    filteredField.correctBoundaryConditions();
 
     unFilteredField.clear();
 
@@ -317,7 +335,13 @@ tmp<volTensorField> simpleGridFilter::operator()
 	}
     }
 
-    filteredField /= fvc::surfaceSum(mesh().magSf());
+    volScalarField ssum=fvc::surfaceSum(mesh().magSf());
+    
+    forAll(ssum, cellI)
+    {
+      filteredField[cellI]/=ssum[cellI];
+    }
+    filteredField.correctBoundaryConditions();
 
     unFilteredField.clear();
 
