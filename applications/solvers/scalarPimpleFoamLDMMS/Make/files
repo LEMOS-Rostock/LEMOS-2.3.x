@@ -1,0 +1,3 @@
+scalarPimpleFoamLDMMS.C
+
+EXE = $(FOAM_APPBIN)/scalarPimpleFoamLDMMS
