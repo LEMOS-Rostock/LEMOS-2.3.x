@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         solve(
                 fvm::ddt(f)
               + fvm::div(phi, f)
-              - turbulence->divFeff(f)
+              + turbulence->divFeff(f)
             );
 
         f.max(0.0);
