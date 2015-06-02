@@ -37,6 +37,7 @@ turbulenceModels/LES/LESfilters/minimumFilter/minimumFilter.C
 turbulenceModels/LES/LESfilters/weightedGaussianFilter/weightedGaussianFilter.C
 turbulenceModels/LES/LESfilters/volWeightedGaussianFilter/volWeightedGaussianFilter.C
 turbulenceModels/LES/LESfilters/differentialFilter/differentialFilter.C
+turbulenceModels/LES/LESfilters/anisotropicDifferentialFilter/anisotropicDifferentialFilter.C
 turbulenceModels/LES/LESfilters/parabolicFilter/parabolicFilter.C
 turbulenceModels/LES/LESfilters/lagrangianFilter/lagrangianFilter.C
 turbulenceModels/LES/LESfilters/simpleGridFilter/simpleGridFilter.C
